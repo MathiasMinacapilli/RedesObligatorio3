@@ -22,8 +22,8 @@ public class RouterNode {
     this.sim = sim;
     myGUI =new GuiTextArea("  Output window for Router #"+ ID + "  ");
     this.vecinos = vecinos;
-    this.costs = new HashMap();
-    this.forwardingTable = new HashMap();
+    this.costs = new HashMap<Integer, Integer>();
+    this.forwardingTable = new HashMap<Integer, Integer>();
     this.vecinos.forEach((idRouter, costo) -> {
     	this.costs.put(idRouter, costo);
     	this.forwardingTable.put(idRouter, idRouter);
@@ -54,7 +54,7 @@ public class RouterNode {
   public void recvUpdate(RouterPacket pkt) {
 	  // Manejar el recibimiento de un paquete
 	  Integer sourceId = pkt.sourceid;
-	  HashMap<Integer, Integer> oldVector = new HashMap();
+	  HashMap<Integer, Integer> oldVector = new HashMap<Integer, Integer>();
 	  this.costs.forEach((idRouterDestino, costo) -> {
 	    	oldVector.put(idRouterDestino, costo);
 	  });
