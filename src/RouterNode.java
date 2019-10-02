@@ -59,6 +59,8 @@ public class RouterNode {
 	    	oldVector.put(idRouterDestino, costo);
 	  });
 	  
+	  /*//!!!!!!!!!!!!!!! setear el costo a mi mismo en 0 en oldVector, no se si es necesario
+	  oldVector.put(this.myID, 0);*/ 
 	  
 	  boolean vectorCambiado = false;
 	  // Recalculo mis costos
@@ -91,8 +93,10 @@ public class RouterNode {
 		  }
 		 
 	  });
-	  //!!!!!!!!!!!!!!! setear mi el costo a mi mismo en 0
+	  //!!!!!!!!!!!!!!! setear el costo a mi mismo en 0
 	  this.costs.put(this.myID, 0);
+	  //!!!!!!!!!!!!!!! setearla interfaz de salida a mi mismo a myID
+	  this.forwardingTable.put(this.myID, this.myID);
 	  
 	  if(!oldVector.equals(this.costs)) {
 		  vectorCambiado = true;
