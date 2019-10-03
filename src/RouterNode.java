@@ -83,8 +83,12 @@ public class RouterNode {
 			  if (this.costs.get(idRouterDeLaTablaDeMiVecino) > costoPasandoPorRouterIntermedioAlDestino) {
 				  // Nos sale mas rentable ir al router y que el vaya a donde queremos
 				  this.costs.put(idRouterDeLaTablaDeMiVecino, costoPasandoPorRouterIntermedioAlDestino);
-				  this.forwardingTable.put(idRouterDeLaTablaDeMiVecino, sourceId);
+				  
+				  this.forwardingTable.put(idRouterDeLaTablaDeMiVecino, this.forwardingTable.get(sourceId)); //!!!!!!!! antes estaba solamente (...,sourceID) pero ver contraejemplo destino 3 del router 0
 				  //si era un vecino actulizo tambien en esa tabla
+				  
+
+				    myGUI.print(F.format(forwardingTable, 70));
 				  
 				  //if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino){     !!!!!!!!!!!!!!un nodo no es vecino de si mismo
 				  if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino)) {
