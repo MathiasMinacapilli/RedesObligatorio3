@@ -100,6 +100,28 @@ public class RouterNode {
 		  vectorCambiado = true;
 	  }
 	  
+	  
+	  /*boolean reversaEnvenenada = true;
+	  if(vectorCambiado) {
+		  HashMap<Integer, Integer> aMandar = new HashMap<Integer, Integer>();  
+		  // Mando actualizacion a mis vecinos
+		  this.vecinos.forEach((idRouter, costo) -> {
+			  this.costs.forEach((k,v)->{				//Ejecutar esto antes de mandarlo cada vez, hace que si cambie algo en la iteracion pasada, se me actualice igual a this.costs sin tener que buscar uno por uno lo que cambie
+				  aMandar.put(k, v);			//aMandar = this.costs
+			  });
+			  if(reversaEnvenenada) {
+				 this.forwardingTable.forEach((k,v)->{		//Si la ruta a un nodo, pasa por el vecino al que le voy a mandar mi tabla, le digo que mi valor hacia ese nodo es infinito
+					 if(idRouter == v) {
+						 aMandar.put(k,sim.INFINITY);
+					 }
+				 });
+				  
+			  }
+		    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, aMandar);
+		    	this.sendUpdate(routerPacket);
+		    });
+	  }*/
+	  
 	  if(vectorCambiado) {
 		  // Mando actualizacion a mis vecinos
 		  this.vecinos.forEach((idRouter, costo) -> {
@@ -107,6 +129,7 @@ public class RouterNode {
 		    	this.sendUpdate(routerPacket);
 		    });
 	  }
+	  
 	  printDistanceTable();
 	  
 	  myGUI.print("\n\n\n");
