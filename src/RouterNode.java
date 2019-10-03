@@ -6,9 +6,10 @@ public class RouterNode {
   private GuiTextArea myGUI;
   private F myFormat;
   private RouterSimulator sim;
-  private HashMap<Integer, Integer> vecinos; // <idVecino, costoMinimo>
-  private HashMap<Integer, Integer> costs; // <idNodoDestino, costoMinimo>
-  private HashMap<Integer, Integer> forwardingTable; // <idNodoDestino, idVecino>
+  private HashMap<Integer, Integer> vecinos; // <idVecino, costoMinimo> ------------------CONTIENE LOS COSTOS MINIMOS A LOS VECINOS
+  private HashMap<Integer, Integer> costs; // <idNodoDestino, costoMinimo> ---------------CONTIENE LOS COSTOS MINIMOS PARA CADA DESTINO
+  private HashMap<Integer, Integer> forwardingTable; // <idNodoDestino, idVecino> --------CONTIENE LAS INTERFACES DE SALIDA PARA CADA DESTINO
+  private HashMap<Integer, HashMap<Integer, Integer>> DistanceVectorVecinos; //<idVecino, distanceVector>  -CONTIENE LOS VECTORES DE DISTANCIA DE LOS VECINOS
 
   
   /*
@@ -28,10 +29,11 @@ public class RouterNode {
     	this.costs.put(idRouter, costo);
     	this.forwardingTable.put(idRouter, idRouter);
     });
+    this.DistanceVectorVecinos = new HashMap<Integer, HashMap<Integer,Integer>>();
     
 	//!!!!!!!!!!!!!!! setear el costo a mi mismo en 0
 	this.costs.put(this.myID, 0);
-	//!!!!!!!!!!!!!!! setearla interfaz de salida a mi mismo a myID
+	//!!!!!!!!!!!!!!! setear la interfaz de salida a mi mismo a myID
 	this.forwardingTable.put(this.myID, this.myID);
 	  
     	
@@ -87,16 +89,15 @@ public class RouterNode {
 				  this.forwardingTable.put(idRouterDeLaTablaDeMiVecino, this.forwardingTable.get(sourceId)); //!!!!!!!! antes estaba solamente (...,sourceID) pero ver contraejemplo destino 3 del router 0
 				  //si era un vecino actulizo tambien en esa tabla
 				  
-
-				    myGUI.print(F.format(forwardingTable, 70));
-				  
-				  //if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino){     !!!!!!!!!!!!!!un nodo no es vecino de si mismo
 				  if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino)) {
 					  this.vecinos.put(idRouterDeLaTablaDeMiVecino, costoPasandoPorRouterIntermedioAlDestino);
-				  }	
+				  }
 			  }
 		 }
 	  });
+	  
+	  //Seteo el vector de distancia del vecino que me mando el pkt
+	  this.DistanceVectorVecinos.put(sourceId, pkt.mincost);
 
 	  if(!oldVector.equals(this.costs)) {
 		  vectorCambiado = true;
@@ -110,6 +111,9 @@ public class RouterNode {
 		    });
 	  }
 	  printDistanceTable();
+	  
+	  myGUI.print("\n\n\n");
+	  myGUI.print(F.format(DistanceVectorVecinos, 70));
   }
   
 
@@ -142,7 +146,7 @@ public class RouterNode {
 	  myGUI.println("Current table for " + myID +
 			"  at time " + sim.getClocktime() + "\n");
 	  
-	  myGUI.print("Vector de distancias y rutas" + "\n\n");
+	  myGUI.print("Vector de distancias y rutas:" + "\n\n");
 
 	  //---------------Fila Destino------------------------ 
 	  myGUI.print(myFormat.format("Destino       |", 25));
@@ -183,6 +187,81 @@ public class RouterNode {
 	  });
 	  
 	  myGUI.println("\n\n\n");
+	  
+	  //--------------Información sobre los vecinos-------
+	  
+	  //TABLA COSTOS ENLACES FISICOS A VECINOS
+	  
+	  myGUI.print("Tabla costos enlaces físicos a vecinos:" + "\n\n");
+	  
+	  //---------------Fila Vecino------------------------ 
+	  myGUI.print(myFormat.format("Vecino       |", 25));
+	  
+	  this.vecinos.forEach((nghbr, costoFisico) -> {
+		  String imprimir = myFormat.format(nghbr, 20);
+		  myGUI.print(imprimir + "   ");		  
+	  });
+	  
+	  myGUI.print("\n");
+	  
+	  for(i=0; i<100; i++) {
+		  myGUI.print("¯");
+	  }
+	  
+	  myGUI.print("\n");
+	  
+	  //---------------Fila Costo------------------------ 
+	  
+	  myGUI.print(myFormat.format("Costo        |", 25));
+	  
+	  this.vecinos.forEach((nghbr, costoFisico) -> {
+		  String imprimir = myFormat.format(costoFisico, 20);
+		  myGUI.print(imprimir + "   ");		  
+	  });
+	  
+	  
+	  myGUI.print("\n\n");
+	  
+	  //TABLA DISTANCE VECTOR VECINOS
+	  
+	  myGUI.print("Vectores de Distancia de vecinos:" + "\n\n");
+	  
+	  //---------------Fila Destino------------------------ 
+	  myGUI.print(myFormat.format("Destino       |", 25));
+	  
+	  this.costs.forEach((router, costo) -> {
+		  String imprimir = myFormat.format(router, 20);
+		  myGUI.print(imprimir + "   ");		  
+	  });
+	  
+	  myGUI.print("\n");
+	  
+	  for(i=0; i<100; i++) {
+		  myGUI.print("¯");
+	  }
+	  
+	  myGUI.print("\n");
+	  
+	  //---------------Filas Vectores------------------------ 
+	  
+	  this.DistanceVectorVecinos.forEach((idVecino, vector)-> {
+			  
+		  myGUI.print(myFormat.format("vecino " + idVecino + "     |", 25));
+		  
+		  this.DistanceVectorVecinos.get(idVecino).forEach((router, costo) -> {
+			  String imprimir = myFormat.format(costo, 20);
+			  myGUI.print(imprimir + "   ");		  
+		  });
+		  
+		  myGUI.print("\n");
+	  });	  
+	  
+	  myGUI.print("\n\n");
+	  
+	  
+	  
+	  
+	  
 	  
   }
 
