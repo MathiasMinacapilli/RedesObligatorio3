@@ -28,6 +28,12 @@ public class RouterNode {
     	this.costs.put(idRouter, costo);
     	this.forwardingTable.put(idRouter, idRouter);
     });
+    
+	//!!!!!!!!!!!!!!! setear el costo a mi mismo en 0
+	this.costs.put(this.myID, 0);
+	//!!!!!!!!!!!!!!! setearla interfaz de salida a mi mismo a myID
+	this.forwardingTable.put(this.myID, this.myID);
+	  
     	
     
     // Enviar mi vector a mis vecinos
@@ -64,40 +70,30 @@ public class RouterNode {
 	  
 	  boolean vectorCambiado = false;
 	  // Recalculo mis costos
-	  pkt.mincost.forEach((idRouterDeLaTablaDeMiVecino, costoRouterIntermedio) -> {
-		  if (!this.costs.containsKey(idRouterDeLaTablaDeMiVecino)) {
-			  this.costs.put(idRouterDeLaTablaDeMiVecino, sim.INFINITY);  //Si reconozco un nuevo router que no era mi vecino, le seteo distancia infinito
-		  }
-		  
-	
-		  
-		  // Integer costoDelRouterIntermedioAlDestino = this.costs.get(idRouterDeLaTablaDeMiVecino) + costoRouterIntermedio;
-		  Integer costoPasandoPorRouterIntermedioAlDestino = this.costs.get(sourceId) + costoRouterIntermedio;  //!!!!!!!!!!no seria eso, o sea, mi costo al vecino + lo del vecino al destino?
-		  if (this.costs.get(idRouterDeLaTablaDeMiVecino) > costoPasandoPorRouterIntermedioAlDestino) {
-			  // Nos sale mas rentable ir al router y que el vaya a donde queremos
-			  this.costs.put(idRouterDeLaTablaDeMiVecino, costoPasandoPorRouterIntermedioAlDestino);
-			  this.forwardingTable.put(idRouterDeLaTablaDeMiVecino, sourceId);
-			  //si era un vecino actulizo tambien en esa tabla
-			  
-			  //if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino){     !!!!!!!!!!!!!!un nodo no es vecino de si mismo
-			  if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino) && idRouterDeLaTablaDeMiVecino!=this.myID) {
-				  this.vecinos.put(idRouterDeLaTablaDeMiVecino, costoPasandoPorRouterIntermedioAlDestino);
-			  }	
-			  
-			  //!!!!!!!!!!!!!!! habria que mandar afuera del forEach esto no?
-			 /* // Mando actualizacion a mis vecinos
-			  this.vecinos.forEach((idRouter, costo) -> {
-			    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, this.costs);
-			    	this.sendUpdate(routerPacket);
-			    });*/
-		  }
-		 
-	  });
-	  //!!!!!!!!!!!!!!! setear el costo a mi mismo en 0
-	  this.costs.put(this.myID, 0);
-	  //!!!!!!!!!!!!!!! setearla interfaz de salida a mi mismo a myID
-	  this.forwardingTable.put(this.myID, this.myID);
 	  
+	  pkt.mincost.forEach((idRouterDeLaTablaDeMiVecino, costoRouterIntermedio) -> {
+		  
+		  if(idRouterDeLaTablaDeMiVecino!=this.myID){
+			  if (!this.costs.containsKey(idRouterDeLaTablaDeMiVecino)) {
+				  this.costs.put(idRouterDeLaTablaDeMiVecino, sim.INFINITY);  //Si reconozco un nuevo router que no era mi vecino, le seteo distancia infinito
+			  }
+			  
+			  //Integer costoDelRouterIntermedioAlDestino = this.costs.get(idRouterDeLaTablaDeMiVecino) + costoRouterIntermedio;
+			  Integer costoPasandoPorRouterIntermedioAlDestino = this.costs.get(sourceId) + costoRouterIntermedio;  //!!!!!!!!!!no seria eso, o sea, mi costo al vecino + lo del vecino al destino?
+			  if (this.costs.get(idRouterDeLaTablaDeMiVecino) > costoPasandoPorRouterIntermedioAlDestino) {
+				  // Nos sale mas rentable ir al router y que el vaya a donde queremos
+				  this.costs.put(idRouterDeLaTablaDeMiVecino, costoPasandoPorRouterIntermedioAlDestino);
+				  this.forwardingTable.put(idRouterDeLaTablaDeMiVecino, sourceId);
+				  //si era un vecino actulizo tambien en esa tabla
+				  
+				  //if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino){     !!!!!!!!!!!!!!un nodo no es vecino de si mismo
+				  if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino)) {
+					  this.vecinos.put(idRouterDeLaTablaDeMiVecino, costoPasandoPorRouterIntermedioAlDestino);
+				  }	
+			  }
+		 }
+	  });
+
 	  if(!oldVector.equals(this.costs)) {
 		  vectorCambiado = true;
 	  }
