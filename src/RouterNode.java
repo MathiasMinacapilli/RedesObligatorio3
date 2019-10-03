@@ -40,13 +40,10 @@ public class RouterNode {
     
     // Enviar mi vector a mis vecinos
     vecinos.forEach((idRouter, costo) -> {
-    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, this.vecinos);  //!!!!!!!!!!!!!!!!!o this.costs? Que en realidad seria lo mismo porque se inicializan iguales, pero semanticamente?
+    	//RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, this.vecinos);  !!!!!!!!!!!!!!!!!o this.costs? Que en realidad seria lo mismo porque se inicializan iguales, pero semanticamente?
+    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, this.costs);
     	this.sendUpdate(routerPacket);
     });
-    
-    //DEBUG
-    myGUI.print(F.format(costs, 70));
-    myGUI.print("\n\n");
     
   }
 
@@ -113,7 +110,6 @@ public class RouterNode {
 	  printDistanceTable();
 	  
 	  myGUI.print("\n\n\n");
-	  myGUI.print(F.format(DistanceVectorVecinos, 70));
   }
   
 
@@ -134,7 +130,24 @@ public class RouterNode {
   
   
   
+  
   /*
+  =============================================================================================
+							UPDATE LINK COST
+  =============================================================================================
+  */
+  
+  
+  public void updateLinkCost(int dest, int newcost) {
+  }
+   
+  
+  
+  
+  
+  
+  
+  /*   OBS: HAY QUE ARREGLAR LAS TABLAS DE IMPRESION INTERMEDIAS QUE QUEDAN CORRIDAS AL PRINCIPIO
   =============================================================================================
 							PRINT DISTANCE TABLE
   =============================================================================================
@@ -259,21 +272,6 @@ public class RouterNode {
 	  myGUI.print("\n\n");
 	  
 	  
-	  
-	  
-	  
-	  
-  }
-
-  
-  /*
-  =============================================================================================
-							UPDATE LINK COST
-  =============================================================================================
-  */
-  
-  
-  public void updateLinkCost(int dest, int newcost) {
   }
 
 }
