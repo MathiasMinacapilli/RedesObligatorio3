@@ -162,7 +162,7 @@ public class RouterNode {
 	  myGUI.print("Vector de distancias y rutas:" + "\n\n");
 
 	  //---------------Fila Destino------------------------ 
-	  myGUI.print(myFormat.format("Destino       |", 25));
+	  myGUI.print(myFormat.format("Destino       |", 23));
 	  
 	  this.costs.forEach((router, costo) -> {
 		  String imprimir = myFormat.format(router, 20);
@@ -180,7 +180,7 @@ public class RouterNode {
 	  
 	  //---------------Fila Costo------------------------ 
 	  
-	  myGUI.print(myFormat.format("Costo        |", 25));
+	  myGUI.print(myFormat.format("Costo        |", 24));
 	  
 	  this.costs.forEach((router, costo) -> {
 		  String imprimir = myFormat.format(costo, 20);
