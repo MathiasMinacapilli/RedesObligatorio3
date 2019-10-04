@@ -4,7 +4,6 @@ import java.util.*;
 public class RouterNode {
   private int myID;
   private GuiTextArea myGUI;
-  private F myFormat;
   private RouterSimulator sim;
   private HashMap<Integer, Integer> vecinos; // <idVecino, costoMinimo> ------------------CONTIENE LOS COSTOS MINIMOS A LOS VECINOS
   private HashMap<Integer, Integer> costs; // <idNodoDestino, costoMinimo> ---------------CONTIENE LOS COSTOS MINIMOS PARA CADA DESTINO
@@ -100,27 +99,7 @@ public class RouterNode {
 		  vectorCambiado = true;
 	  }
 	  
-	  
-	  /*boolean reversaEnvenenada = true;
-	  if(vectorCambiado) {
-		  HashMap<Integer, Integer> aMandar = new HashMap<Integer, Integer>();  
-		  // Mando actualizacion a mis vecinos
-		  this.vecinos.forEach((idRouter, costo) -> {
-			  this.costs.forEach((k,v)->{				//Ejecutar esto antes de mandarlo cada vez, hace que si cambie algo en la iteracion pasada, se me actualice igual a this.costs sin tener que buscar uno por uno lo que cambie
-				  aMandar.put(k, v);			//aMandar = this.costs
-			  });
-			  if(reversaEnvenenada) {
-				 this.forwardingTable.forEach((k,v)->{		//Si la ruta a un nodo, pasa por el vecino al que le voy a mandar mi tabla, le digo que mi valor hacia ese nodo es infinito
-					 if(idRouter == v) {
-						 aMandar.put(k,sim.INFINITY);
-					 }
-				 });
-				  
-			  }
-		    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, aMandar);
-		    	this.sendUpdate(routerPacket);
-		    });
-	  }*/
+	
 	  
 	  if(vectorCambiado) {
 		  // Mando actualizacion a mis vecinos
@@ -162,11 +141,32 @@ public class RouterNode {
   
   
   public void updateLinkCost(int dest, int newcost) {
+	  // Ver si cambió mi costo del link y si actualizo mi vector de distancias
+	  // entonces reenviarlo a mis vecinos jaja saludos
   }
    
-  
-  
-  
+  public void reversaEnvenenada() {
+	  /*boolean reversaEnvenenada = true;
+	  if(vectorCambiado) {
+	  HashMap<Integer, Integer> aMandar = new HashMap<Integer, Integer>();  
+	  // Mando actualizacion a mis vecinos
+	  this.vecinos.forEach((idRouter, costo) -> {
+		  this.costs.forEach((k,v)->{				//Ejecutar esto antes de mandarlo cada vez, hace que si cambie algo en la iteracion pasada, se me actualice igual a this.costs sin tener que buscar uno por uno lo que cambie
+			  aMandar.put(k, v);			//aMandar = this.costs
+		  });
+		  if(reversaEnvenenada) {
+			 this.forwardingTable.forEach((k,v)->{		//Si la ruta a un nodo, pasa por el vecino al que le voy a mandar mi tabla, le digo que mi valor hacia ese nodo es infinito
+				 if(idRouter == v) {
+					 aMandar.put(k,sim.INFINITY);
+				 }
+			 });
+			  
+		  }
+	    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, aMandar);
+	    	this.sendUpdate(routerPacket);
+	    });
+	}*/
+  }
   
   
   
@@ -185,10 +185,10 @@ public class RouterNode {
 	  myGUI.print("Vector de distancias y rutas:" + "\n\n");
 
 	  //---------------Fila Destino------------------------ 
-	  myGUI.print(myFormat.format("Destino       |", 23));
+	  myGUI.print(F.format("Destino       |", 23));
 	  
 	  this.costs.forEach((router, costo) -> {
-		  String imprimir = myFormat.format(router, 20);
+		  String imprimir = F.format(router, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
 	  
@@ -203,10 +203,10 @@ public class RouterNode {
 	  
 	  //---------------Fila Costo------------------------ 
 	  
-	  myGUI.print(myFormat.format("Costo        |", 24));
+	  myGUI.print(F.format("Costo        |", 24));
 	  
 	  this.costs.forEach((router, costo) -> {
-		  String imprimir = myFormat.format(costo, 20);
+		  String imprimir = F.format(costo, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
 	  
@@ -215,10 +215,10 @@ public class RouterNode {
 	  
 	  //---------------Fila Ruta-------------------------
 	  
-	  myGUI.print(myFormat.format("Ruta        |", 25));
+	  myGUI.print(F.format("Ruta        |", 25));
 	  
 	  this.forwardingTable.forEach((idDestino, interfazSalida) -> {
-		  String imprimir = myFormat.format(interfazSalida, 20);
+		  String imprimir = F.format(interfazSalida, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
 	  
@@ -231,10 +231,10 @@ public class RouterNode {
 	  myGUI.print("Tabla costos enlaces físicos a vecinos:" + "\n\n");
 	  
 	  //---------------Fila Vecino------------------------ 
-	  myGUI.print(myFormat.format("Vecino       |", 25));
+	  myGUI.print(F.format("Vecino       |", 25));
 	  
 	  this.vecinos.forEach((nghbr, costoFisico) -> {
-		  String imprimir = myFormat.format(nghbr, 20);
+		  String imprimir = F.format(nghbr, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
 	  
@@ -248,10 +248,10 @@ public class RouterNode {
 	  
 	  //---------------Fila Costo------------------------ 
 	  
-	  myGUI.print(myFormat.format("Costo        |", 25));
+	  myGUI.print(F.format("Costo        |", 25));
 	  
 	  this.vecinos.forEach((nghbr, costoFisico) -> {
-		  String imprimir = myFormat.format(costoFisico, 20);
+		  String imprimir = F.format(costoFisico, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
 	  
@@ -263,10 +263,10 @@ public class RouterNode {
 	  myGUI.print("Vectores de Distancia de vecinos:" + "\n\n");
 	  
 	  //---------------Fila Destino------------------------ 
-	  myGUI.print(myFormat.format("Destino       |", 25));
+	  myGUI.print(F.format("Destino       |", 25));
 	  
 	  this.costs.forEach((router, costo) -> {
-		  String imprimir = myFormat.format(router, 20);
+		  String imprimir = F.format(router, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
 	  
@@ -282,10 +282,10 @@ public class RouterNode {
 	  
 	  this.DistanceVectorVecinos.forEach((idVecino, vector)-> {
 			  
-		  myGUI.print(myFormat.format("vecino " + idVecino + "     |", 25));
+		  myGUI.print(F.format("vecino " + idVecino + "     |", 25));
 		  
 		  this.DistanceVectorVecinos.get(idVecino).forEach((router, costo) -> {
-			  String imprimir = myFormat.format(costo, 20);
+			  String imprimir = F.format(costo, 20);
 			  myGUI.print(imprimir + "   ");		  
 		  });
 		  
