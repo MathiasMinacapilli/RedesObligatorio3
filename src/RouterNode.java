@@ -270,8 +270,13 @@ public class RouterNode {
 	  myGUI.print(F.format("Ruta        |", 25));
 	  
 	  this.myForwardingTable.forEach((idDestino, interfazSalida) -> {
-		  String imprimir = F.format(interfazSalida, 20);
-		  myGUI.print(imprimir + "   ");		  
+                  if(myDistanciasMinimas.get(idDestino) == 999){
+                    String imprimir = "                  -    ";
+                    myGUI.print(imprimir + "   ");
+                  } else{
+                    String imprimir = F.format(interfazSalida, 20);
+                    myGUI.print(imprimir + "   ");
+		  }
 	  });
 	  
 	  myGUI.println("\n\n\n");
@@ -293,7 +298,7 @@ public class RouterNode {
 	  myGUI.print("\n");
 	  
 	  for(i=0; i<100; i++) {
-		  myGUI.print("¯");
+		  myGUI.print("-");
 	  }
 	  
 	  myGUI.print("\n");
