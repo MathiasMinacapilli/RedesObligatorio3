@@ -9,7 +9,7 @@ public class RouterNode {
   private HashMap<Integer, Integer> myDistanciasMinimas; // <idNodoDestino, costoMinimo> ---------------CONTIENE LOS COSTOS MINIMOS PARA CADA DESTINO
   private HashMap<Integer, Integer> myForwardingTable; // <idNodoDestino, idVecino> --------CONTIENE LAS INTERFACES DE SALIDA PARA CADA DESTINO
   private HashMap<Integer, HashMap<Integer, Integer>> DistanceVectorDeVecinos; //<idVecino, distanceVector>  -CONTIENE LOS VECTORES DE DISTANCIA DE LOS VECINOS
-  private boolean reversaEnvenenada = true;
+  private boolean reversaEnvenenada = false;
   private Integer cantidadUpdates = 0;
   
   /*
