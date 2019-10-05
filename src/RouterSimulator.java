@@ -14,13 +14,12 @@ Output GUIs added by Ch. Schuba 2007.
 
 public class RouterSimulator {
 
-  public static final int NUM_NODES = 4;
+  public static final int NUM_NODES = 3;
   public static final int INFINITY = 999;
 
-  public static final boolean LINKCHANGES = false;
+  public static final boolean LINKCHANGES = true;
 
-  public int TRACE = 1;             /* for debugging */
-  
+  public int TRACE = 3;             /* for debugging */
   public int SLOW = 0;
 
   private GuiTextArea myGUI = null;
@@ -88,18 +87,12 @@ should not have to, and you defeinitely should not have to modify
 
     /* set initial costs */
     // remember that in java everything defaults to 0
-    connectcosts[0][1]=1;  
-    connectcosts[0][2]=3;
-    connectcosts[0][3]=7;
-    connectcosts[1][0]=1;
-    connectcosts[1][2]=1;
-    connectcosts[1][3]=INFINITY;
-    connectcosts[2][0]=3;  
-    connectcosts[2][1]=1;
-    connectcosts[2][3]=2;
-    connectcosts[3][0]=7;
-    connectcosts[3][1]=INFINITY;
-    connectcosts[3][2]=2;
+    connectcosts[0][1]=4;  
+    connectcosts[0][2]=1;
+    connectcosts[1][0]=4;
+    connectcosts[1][2]=50;
+    connectcosts[2][0]=1;
+    connectcosts[2][1]=50;
     
     nodes = new RouterNode[NUM_NODES];
     for(int i=0; i<NUM_NODES; i++){
@@ -115,22 +108,13 @@ should not have to, and you defeinitely should not have to modify
     /* initialize future link changes */
     if (LINKCHANGES)   {
       evptr = new Event();
-      evptr.evtime =  10000.0;
+      evptr.evtime =  40;
       evptr.evtype =  LINK_CHANGE;
-      evptr.eventity =  0;
-      evptr.rtpktptr =  null;
-      evptr.dest = 3;
-      evptr.cost = 1;
-      insertevent(evptr);
-
-      evptr = new Event();
-      evptr.evtype =  LINK_CHANGE;
-      evptr.evtime =  20000.0;
       evptr.eventity =  0;
       evptr.rtpktptr =  null;
       evptr.dest = 1;
-      evptr.cost = 6;
-      insertevent(evptr);    
+      evptr.cost = 60;
+      insertevent(evptr);
     }
   
   }
@@ -144,16 +128,16 @@ should not have to, and you defeinitely should not have to modify
      
       eventptr = evlist;            /* get next event to simulate */
       if (eventptr==null)
-	    break;
+	break;
       evlist = evlist.next;        /* remove this event from event list */
       if (evlist!=null)
-        evlist.prev=null;
+           evlist.prev=null;
       if (TRACE>1) {
-	    myGUI.println("MAIN: rcv event, t="+
+	myGUI.println("MAIN: rcv event, t="+
 			   eventptr.evtime+ " at "+
 			   eventptr.eventity);
-        if (eventptr.evtype == FROM_LAYER2 ) {
-	        myGUI.print(" src:"+eventptr.rtpktptr.sourceid);
+          if (eventptr.evtype == FROM_LAYER2 ) {
+	    myGUI.print(" src:"+eventptr.rtpktptr.sourceid);
             myGUI.print(", dest:"+eventptr.rtpktptr.destid);
             myGUI.println(", contents: "+ 
               eventptr.rtpktptr.mincost.toString());
@@ -161,18 +145,18 @@ should not have to, and you defeinitely should not have to modify
           }
       clocktime = eventptr.evtime;    /* update time to next event time */
       if (eventptr.evtype == FROM_LAYER2 ) {
-	    if(eventptr.eventity >=0 && eventptr.eventity < NUM_NODES)
-	        nodes[eventptr.eventity].recvUpdate(eventptr.rtpktptr);
+	if(eventptr.eventity >=0 && eventptr.eventity < NUM_NODES)
+	  nodes[eventptr.eventity].recvUpdate(eventptr.rtpktptr);
 	    else { 
 	        myGUI.println("Panic: unknown event entity\n"); 
 	        System.exit(0); 
 	    }
       }
       else if (eventptr.evtype == LINK_CHANGE ) {
-	    // change link costs here if implemented
-	    nodes[eventptr.eventity].updateLinkCost(eventptr.dest,
+	// change link costs here if implemented
+	nodes[eventptr.eventity].updateLinkCost(eventptr.dest,
 						eventptr.cost);
-	    nodes[eventptr.dest].updateLinkCost(eventptr.eventity,
+	nodes[eventptr.dest].updateLinkCost(eventptr.eventity,
 					    eventptr.cost);
       }
       else { 
@@ -181,9 +165,9 @@ should not have to, and you defeinitely should not have to modify
       }
       
       if(TRACE > 2)
-    	for(int i=0;i<NUM_NODES;i++)
-	      nodes[i].printDistanceTable();
-	      	  
+	for(int i=0;i<NUM_NODES;i++)
+	  nodes[i].printDistanceTable();
+
 	  try {
         Thread.sleep(SLOW);               
       } 

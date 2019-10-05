@@ -9,7 +9,8 @@ public class RouterNode {
   private HashMap<Integer, Integer> myDistanciasMinimas; // <idNodoDestino, costoMinimo> ---------------CONTIENE LOS COSTOS MINIMOS PARA CADA DESTINO
   private HashMap<Integer, Integer> myForwardingTable; // <idNodoDestino, idVecino> --------CONTIENE LAS INTERFACES DE SALIDA PARA CADA DESTINO
   private HashMap<Integer, HashMap<Integer, Integer>> DistanceVectorDeVecinos; //<idVecino, distanceVector>  -CONTIENE LOS VECTORES DE DISTANCIA DE LOS VECINOS
-  private boolean reversaEnvenenada = false;
+  private boolean reversaEnvenenada = true;
+  private Integer cantidadUpdates = 0;
   
   /*
   =============================================================================================
@@ -56,6 +57,8 @@ public class RouterNode {
   =============================================================================================
   */
   public void recvUpdate(RouterPacket pkt) {
+	  cantidadUpdates++;
+	  
 	  // Manejar el recibimiento de un paquete
 	  Integer sourceId = pkt.sourceid;
 	  
@@ -197,7 +200,7 @@ public class RouterNode {
    
   public void reversaEnvenenada(boolean vectorCambiado) {
 
-	/*  if(vectorCambiado) {
+	  if(vectorCambiado) {
 	  HashMap<Integer, Integer> aMandar = new HashMap<Integer, Integer>();  
 	  // Mando actualizacion a mis vecinos
 	  this.myVecinos.forEach((idRouter, costo) -> {
@@ -215,7 +218,7 @@ public class RouterNode {
 	    	this.sendUpdate(routerPacket);
 	    });
 	}
-  }*/
+  }
   
   
   
@@ -341,6 +344,9 @@ public class RouterNode {
 		  myGUI.print("\n");
 	  });	  
 	  
+	  myGUI.print("\n\n");
+	  
+	  myGUI.print("CANTIDAD UPDATES RECIBIDOS: " + this.cantidadUpdates);
 	  myGUI.print("\n\n");
 	  
 	  
