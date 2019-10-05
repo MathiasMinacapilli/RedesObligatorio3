@@ -5,11 +5,11 @@ public class RouterNode {
   private int myID;
   private GuiTextArea myGUI;
   private RouterSimulator sim;
-  private HashMap<Integer, Integer> vecinos; // <idVecino, costoMinimo> ------------------CONTIENE LOS COSTOS MINIMOS A LOS VECINOS
-  private HashMap<Integer, Integer> costs; // <idNodoDestino, costoMinimo> ---------------CONTIENE LOS COSTOS MINIMOS PARA CADA DESTINO
-  private HashMap<Integer, Integer> forwardingTable; // <idNodoDestino, idVecino> --------CONTIENE LAS INTERFACES DE SALIDA PARA CADA DESTINO
-  private HashMap<Integer, HashMap<Integer, Integer>> DistanceVectorVecinos; //<idVecino, distanceVector>  -CONTIENE LOS VECTORES DE DISTANCIA DE LOS VECINOS
-
+  private HashMap<Integer, Integer> myVecinos; // <idVecino, costoMinimo> ------------------CONTIENE LOS COSTOS MINIMOS A LOS VECINOS
+  private HashMap<Integer, Integer> myDistanciasMinimas; // <idNodoDestino, costoMinimo> ---------------CONTIENE LOS COSTOS MINIMOS PARA CADA DESTINO
+  private HashMap<Integer, Integer> myForwardingTable; // <idNodoDestino, idVecino> --------CONTIENE LAS INTERFACES DE SALIDA PARA CADA DESTINO
+  private HashMap<Integer, HashMap<Integer, Integer>> DistanceVectorDeVecinos; //<idVecino, distanceVector>  -CONTIENE LOS VECTORES DE DISTANCIA DE LOS VECINOS
+  private boolean reversaEnvenenada = false;
   
   /*
   =============================================================================================
@@ -21,26 +21,26 @@ public class RouterNode {
     myID = ID;
     this.sim = sim;
     myGUI =new GuiTextArea("  Output window for Router #"+ ID + "  ");
-    this.vecinos = vecinos;
-    this.costs = new HashMap<Integer, Integer>();
-    this.forwardingTable = new HashMap<Integer, Integer>();
-    this.vecinos.forEach((idRouter, costo) -> {
-    	this.costs.put(idRouter, costo);
-    	this.forwardingTable.put(idRouter, idRouter);
+    this.myVecinos = vecinos;
+    this.myDistanciasMinimas = new HashMap<Integer, Integer>();
+    this.myForwardingTable = new HashMap<Integer, Integer>();
+    this.myVecinos.forEach((idRouter, costo) -> {
+    	this.myDistanciasMinimas.put(idRouter, costo);
+    	this.myForwardingTable.put(idRouter, idRouter);
     });
-    this.DistanceVectorVecinos = new HashMap<Integer, HashMap<Integer,Integer>>();
+    this.DistanceVectorDeVecinos = new HashMap<Integer, HashMap<Integer,Integer>>();
     
 	//!!!!!!!!!!!!!!! setear el costo a mi mismo en 0
-	this.costs.put(this.myID, 0);
+	this.myDistanciasMinimas.put(this.myID, 0);
 	//!!!!!!!!!!!!!!! setear la interfaz de salida a mi mismo a myID
-	this.forwardingTable.put(this.myID, this.myID);
+	this.myForwardingTable.put(this.myID, this.myID);
 	  
     	
     
     // Enviar mi vector a mis vecinos
     vecinos.forEach((idRouter, costo) -> {
     	//RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, this.vecinos);  !!!!!!!!!!!!!!!!!o this.costs? Que en realidad seria lo mismo porque se inicializan iguales, pero semanticamente?
-    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, this.costs);
+    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, this.myDistanciasMinimas);
     	this.sendUpdate(routerPacket);
     });
     
@@ -58,56 +58,64 @@ public class RouterNode {
   public void recvUpdate(RouterPacket pkt) {
 	  // Manejar el recibimiento de un paquete
 	  Integer sourceId = pkt.sourceid;
+	  
+	  // Ver si cambió mi costo del link y si actualizo mi vector de distancias
+	  // entonces reenviarlo a mis vecinos
 	  HashMap<Integer, Integer> oldVector = new HashMap<Integer, Integer>();
-	  this.costs.forEach((idRouterDestino, costo) -> {
+	  this.myDistanciasMinimas.forEach((idRouterDestino, costo) -> {
 	    	oldVector.put(idRouterDestino, costo);
 	  });
 	  
-	  /*//!!!!!!!!!!!!!!! setear el costo a mi mismo en 0 en oldVector, no se si es necesario
-	  oldVector.put(this.myID, 0);*/ 
+	  this.DistanceVectorDeVecinos.put(sourceId, pkt.mincost);
 	  
 	  boolean vectorCambiado = false;
 	  // Recalculo mis costos
 	  
-	  pkt.mincost.forEach((idRouterDeLaTablaDeMiVecino, costoRouterIntermedio) -> {
-		  
-		  if(idRouterDeLaTablaDeMiVecino!=this.myID){
-			  if (!this.costs.containsKey(idRouterDeLaTablaDeMiVecino)) {
-				  this.costs.put(idRouterDeLaTablaDeMiVecino, sim.INFINITY);  //Si reconozco un nuevo router que no era mi vecino, le seteo distancia infinito
-			  }
-			  
-			  //Integer costoDelRouterIntermedioAlDestino = this.costs.get(idRouterDeLaTablaDeMiVecino) + costoRouterIntermedio;
-			  Integer costoPasandoPorRouterIntermedioAlDestino = this.costs.get(sourceId) + costoRouterIntermedio;  //!!!!!!!!!!no seria eso, o sea, mi costo al vecino + lo del vecino al destino?
-			  if (this.costs.get(idRouterDeLaTablaDeMiVecino) > costoPasandoPorRouterIntermedioAlDestino) {
-				  // Nos sale mas rentable ir al router y que el vaya a donde queremos
-				  this.costs.put(idRouterDeLaTablaDeMiVecino, costoPasandoPorRouterIntermedioAlDestino);
-				  
-				  this.forwardingTable.put(idRouterDeLaTablaDeMiVecino, this.forwardingTable.get(sourceId)); //!!!!!!!! antes estaba solamente (...,sourceID) pero ver contraejemplo destino 3 del router 0
-				  //si era un vecino actulizo tambien en esa tabla
-				  
-				  if (this.vecinos.containsKey(idRouterDeLaTablaDeMiVecino)) {
-					  this.vecinos.put(idRouterDeLaTablaDeMiVecino, costoPasandoPorRouterIntermedioAlDestino);
-				  }
-			  }
-		 }
+	  
+	  //Reinicializo mi vector de distanciasMinimas
+	  this.myDistanciasMinimas.forEach((idRouterDestino, costo)->{
+		  if(idRouterDestino != this.myID) {
+			  this.myDistanciasMinimas.put(idRouterDestino, sim.INFINITY);
+		  }
 	  });
 	  
-	  //Seteo el vector de distancia del vecino que me mando el pkt
-	  this.DistanceVectorVecinos.put(sourceId, pkt.mincost);
-
-	  if(!oldVector.equals(this.costs)) {
+	  pkt.mincost.forEach((idDestino, costo)->{
+		  if(!this.myDistanciasMinimas.containsKey(idDestino)) {
+			  this.myDistanciasMinimas.put(idDestino, sim.INFINITY);
+		  }
+		  this.myVecinos.forEach((vecino, costoVecino)->{
+			  if((this.DistanceVectorDeVecinos.get(vecino)!= null) && this.DistanceVectorDeVecinos.get(vecino).containsKey(idDestino)){
+				  Integer costoMedianteVecino = this.myVecinos.get(vecino) + this.DistanceVectorDeVecinos.get(vecino).get(idDestino);
+				  if(this.myDistanciasMinimas.get(idDestino) > costoMedianteVecino) {
+					  this.myDistanciasMinimas.put(idDestino, costoMedianteVecino);
+					  this.myForwardingTable.put(idDestino, vecino);
+				  }
+			  }
+		  });
+	  });
+	  
+	  if(!oldVector.equals(this.myDistanciasMinimas)) {
 		  vectorCambiado = true;
 	  }
 	  
-	
-	  
-	  if(vectorCambiado) {
-		  // Mando actualizacion a mis vecinos
-		  this.vecinos.forEach((idRouter, costo) -> {
-		    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, this.costs);
-		    	this.sendUpdate(routerPacket);
-		    });
+	  if(reversaEnvenenada) {
+		  reversaEnvenenada(vectorCambiado);
+	  }else {
+		  
+		  if(vectorCambiado) {
+			  //mando actualización a vecinos
+			  this.myVecinos.forEach((idRouter, costo)->{
+				  RouterPacket packetActualizado = new RouterPacket(this.myID, idRouter, this.myDistanciasMinimas);
+				  this.sendUpdate(packetActualizado);
+			  });
+		  }
 	  }
+	  
+
+	  
+	  //Seteo el vector de distancia del vecino que me mando el pkt
+	  this.DistanceVectorDeVecinos.put(sourceId, pkt.mincost);
+
 	  
 	  printDistanceTable();
 	  
@@ -142,31 +150,72 @@ public class RouterNode {
   
   public void updateLinkCost(int dest, int newcost) {
 	  // Ver si cambió mi costo del link y si actualizo mi vector de distancias
-	  // entonces reenviarlo a mis vecinos jaja saludos
+	  // entonces reenviarlo a mis vecinos
+	  HashMap<Integer, Integer> oldVector = new HashMap<Integer, Integer>();
+	  this.myDistanciasMinimas.forEach((idRouterDestino, costo) -> {
+	    	oldVector.put(idRouterDestino, costo);
+	  });
+	  
+	  /*//!!!!!!!!!!!!!!! setear el costo a mi mismo en 0 en oldVector, no se si es necesario
+	  oldVector.put(this.myID, 0);*/ 
+	  
+	  boolean vectorCambiado = false;
+	  // Recalculo mis costos
+	  
+	  this.myVecinos.put(dest, newcost);
+	  
+	  //Reinicializo mi vector de distanciasMinimas
+	  this.myDistanciasMinimas.forEach((idRouterDestino, costo)->{
+		  if(idRouterDestino != this.myID) {
+			  this.myDistanciasMinimas.put(idRouterDestino, sim.INFINITY);
+		  }
+	  });
+	  
+	  this.myDistanciasMinimas.forEach((idDestino, costo)->{
+		  this.myVecinos.forEach((vecino, costoVecino)->{
+			  Integer costoMedianteVecino = this.myVecinos.get(vecino) + this.DistanceVectorDeVecinos.get(vecino).get(idDestino);
+			  if(this.myDistanciasMinimas.get(idDestino) > costoMedianteVecino) {
+				  this.myDistanciasMinimas.put(idDestino, costoMedianteVecino);
+				  this.myForwardingTable.put(idDestino, vecino);
+			  }
+		  });
+	  });
+	  
+	  if(!oldVector.equals(this.myDistanciasMinimas)) {
+		  vectorCambiado = true;
+	  }
+	  
+	  if(vectorCambiado) {
+		  //mando actualización a vecinos
+		  this.myVecinos.forEach((idRouter, costo)->{
+			  RouterPacket packetActualizado = new RouterPacket(this.myID, idRouter, this.myDistanciasMinimas);
+			  this.sendUpdate(packetActualizado);
+		  });
+	  }
+	  
   }
    
-  public void reversaEnvenenada() {
-	  /*boolean reversaEnvenenada = true;
-	  if(vectorCambiado) {
+  public void reversaEnvenenada(boolean vectorCambiado) {
+
+	/*  if(vectorCambiado) {
 	  HashMap<Integer, Integer> aMandar = new HashMap<Integer, Integer>();  
 	  // Mando actualizacion a mis vecinos
-	  this.vecinos.forEach((idRouter, costo) -> {
-		  this.costs.forEach((k,v)->{				//Ejecutar esto antes de mandarlo cada vez, hace que si cambie algo en la iteracion pasada, se me actualice igual a this.costs sin tener que buscar uno por uno lo que cambie
+	  this.myVecinos.forEach((idRouter, costo) -> {
+		  this.myDistanciasMinimas.forEach((k,v)->{				//Ejecutar esto antes de mandarlo cada vez, hace que si cambie algo en la iteracion pasada, se me actualice igual a this.costs sin tener que buscar uno por uno lo que cambie
 			  aMandar.put(k, v);			//aMandar = this.costs
 		  });
-		  if(reversaEnvenenada) {
-			 this.forwardingTable.forEach((k,v)->{		//Si la ruta a un nodo, pasa por el vecino al que le voy a mandar mi tabla, le digo que mi valor hacia ese nodo es infinito
+
+			 this.myForwardingTable.forEach((k,v)->{		//Si la ruta a un nodo, pasa por el vecino al que le voy a mandar mi tabla, le digo que mi valor hacia ese nodo es infinito
 				 if(idRouter == v) {
 					 aMandar.put(k,sim.INFINITY);
 				 }
 			 });
 			  
-		  }
 	    	RouterPacket routerPacket = new RouterPacket(this.myID, idRouter, aMandar);
 	    	this.sendUpdate(routerPacket);
 	    });
-	}*/
-  }
+	}
+  }*/
   
   
   
@@ -187,7 +236,7 @@ public class RouterNode {
 	  //---------------Fila Destino------------------------ 
 	  myGUI.print(F.format("Destino       |", 23));
 	  
-	  this.costs.forEach((router, costo) -> {
+	  this.myDistanciasMinimas.forEach((router, costo) -> {
 		  String imprimir = F.format(router, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
@@ -205,7 +254,7 @@ public class RouterNode {
 	  
 	  myGUI.print(F.format("Costo        |", 24));
 	  
-	  this.costs.forEach((router, costo) -> {
+	  this.myDistanciasMinimas.forEach((router, costo) -> {
 		  String imprimir = F.format(costo, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
@@ -217,7 +266,7 @@ public class RouterNode {
 	  
 	  myGUI.print(F.format("Ruta        |", 25));
 	  
-	  this.forwardingTable.forEach((idDestino, interfazSalida) -> {
+	  this.myForwardingTable.forEach((idDestino, interfazSalida) -> {
 		  String imprimir = F.format(interfazSalida, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
@@ -233,7 +282,7 @@ public class RouterNode {
 	  //---------------Fila Vecino------------------------ 
 	  myGUI.print(F.format("Vecino       |", 25));
 	  
-	  this.vecinos.forEach((nghbr, costoFisico) -> {
+	  this.myVecinos.forEach((nghbr, costoFisico) -> {
 		  String imprimir = F.format(nghbr, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
@@ -250,7 +299,7 @@ public class RouterNode {
 	  
 	  myGUI.print(F.format("Costo        |", 25));
 	  
-	  this.vecinos.forEach((nghbr, costoFisico) -> {
+	  this.myVecinos.forEach((nghbr, costoFisico) -> {
 		  String imprimir = F.format(costoFisico, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
@@ -265,7 +314,7 @@ public class RouterNode {
 	  //---------------Fila Destino------------------------ 
 	  myGUI.print(F.format("Destino       |", 25));
 	  
-	  this.costs.forEach((router, costo) -> {
+	  this.myDistanciasMinimas.forEach((router, costo) -> {
 		  String imprimir = F.format(router, 20);
 		  myGUI.print(imprimir + "   ");		  
 	  });
@@ -280,11 +329,11 @@ public class RouterNode {
 	  
 	  //---------------Filas Vectores------------------------ 
 	  
-	  this.DistanceVectorVecinos.forEach((idVecino, vector)-> {
+	  this.DistanceVectorDeVecinos.forEach((idVecino, vector)-> {
 			  
 		  myGUI.print(F.format("vecino " + idVecino + "     |", 25));
 		  
-		  this.DistanceVectorVecinos.get(idVecino).forEach((router, costo) -> {
+		  this.DistanceVectorDeVecinos.get(idVecino).forEach((router, costo) -> {
 			  String imprimir = F.format(costo, 20);
 			  myGUI.print(imprimir + "   ");		  
 		  });
