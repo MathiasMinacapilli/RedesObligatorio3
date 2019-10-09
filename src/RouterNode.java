@@ -69,18 +69,12 @@ public class RouterNode {
 	    	oldVector.put(idRouterDestino, costo);
 	  });
 	  
+	  //Seteo el vector de distancia del vecino que me mando el pkt
 	  this.DistanceVectorDeVecinos.put(sourceId, pkt.mincost);
 	  
 	  boolean vectorCambiado = false;
 	  // Recalculo mis costos
 	  
-	  
-	  //Reinicializo mi vector de distanciasMinimas
-	  this.myDistanciasMinimas.forEach((idRouterDestino, costo)->{
-		  if(idRouterDestino != this.myID) {
-			  this.myDistanciasMinimas.put(idRouterDestino, sim.INFINITY);
-		  }
-	  });
 	  
 	  pkt.mincost.forEach((idDestino, costo)->{
 		  if(!this.myDistanciasMinimas.containsKey(idDestino)) {
@@ -116,15 +110,14 @@ public class RouterNode {
 	  
 
 	  
-	  //Seteo el vector de distancia del vecino que me mando el pkt
-	  this.DistanceVectorDeVecinos.put(sourceId, pkt.mincost);
 
-	  
+	  if(vectorCambiado) {
 	  printDistanceTable();
 	  
 	  myGUI.print("\n\n\n");
+
+	  }
   }
-  
 
   
   
