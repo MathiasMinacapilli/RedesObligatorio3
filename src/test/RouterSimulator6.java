@@ -135,20 +135,11 @@ should not have to, and you defeinitely should not have to modify
       evptr = new Event();
       evptr.evtime =  10000.0;
       evptr.evtype =  LINK_CHANGE;
-      evptr.eventity =  0;
+      evptr.eventity =  2;
       evptr.rtpktptr =  null;
       evptr.dest = 3;
-      evptr.cost = 1;
-      insertevent(evptr);
-
-      evptr = new Event();
-      evptr.evtype =  LINK_CHANGE;
-      evptr.evtime =  20000.0;
-      evptr.eventity =  0;
-      evptr.rtpktptr =  null;
-      evptr.dest = 1;
-      evptr.cost = 6;
-      insertevent(evptr);    
+      evptr.cost = 5;
+      insertevent(evptr);   
     }
   
   }
