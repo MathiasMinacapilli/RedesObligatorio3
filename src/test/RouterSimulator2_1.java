@@ -19,7 +19,7 @@ public class RouterSimulator {
 
   public static final boolean LINKCHANGES = true;
 
-  public int TRACE = 1;             /* for debugging */
+  public int TRACE = 4;             /* for debugging */
   
   public int SLOW = 0;
 
@@ -88,7 +88,7 @@ should not have to, and you defeinitely should not have to modify
 
     /* set initial costs */
     // remember that in java everything defaults to 0
-    connectcosts[0][1]=INFINITY;
+    connectcosts[0][1]=INFINITY;  
     connectcosts[1][0]=INFINITY;
 
     

@@ -26,6 +26,14 @@ clobber: clean
 test: RouterSimulator.class
 	$(JAVA) -DTrace=3 RouterSimulator
 	
+install2_1:
+	-@echo 
+	-@echo "  Warning: this command will overwrite file ./RouterSimulator.java"
+	-@echo 
+	-@echo "Continue with ^D, exit with ^C"
+	-@cat > /dev/null
+	-@make clobber
+	-@cp test/RouterSimulator2_1.java RouterSimulator.java
 
 install2:
 	-@echo 

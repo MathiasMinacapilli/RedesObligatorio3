@@ -23,6 +23,9 @@ public class RouterNode {
     this.sim = sim;
     myGUI =new GuiTextArea("  Output window for Router #"+ ID + "  ");
     this.myVecinos = vecinos;
+    if(this.myVecinos == null) {
+    	this.myVecinos = new HashMap<Integer, Integer>();
+    }
     this.myDistanciasMinimas = new HashMap<Integer, Integer>();
     this.myForwardingTable = new HashMap<Integer, Integer>();
     this.myVecinos.forEach((idRouter, costo) -> {
@@ -159,6 +162,10 @@ public class RouterNode {
 	  // Recalculo mis costos
 	  
 	  this.myVecinos.put(dest, newcost);
+	  if(!this.myDistanciasMinimas.containsKey(dest)) {
+		  this.myDistanciasMinimas.put(dest, newcost);
+		  this.myForwardingTable.put(dest,dest);
+	  }
 	  
 	  //Reinicializo mi vector de distanciasMinimas
 	  this.myDistanciasMinimas.forEach((idRouterDestino, costo)->{
@@ -169,10 +176,12 @@ public class RouterNode {
 	  
 	  this.myDistanciasMinimas.forEach((idDestino, costo)->{
 		  this.myVecinos.forEach((vecino, costoVecino)->{
-			  Integer costoMedianteVecino = this.myVecinos.get(vecino) + this.DistanceVectorDeVecinos.get(vecino).get(idDestino);
-			  if(this.myDistanciasMinimas.get(idDestino) > costoMedianteVecino) {
-				  this.myDistanciasMinimas.put(idDestino, costoMedianteVecino);
-				  this.myForwardingTable.put(idDestino, vecino);
+			  if((this.DistanceVectorDeVecinos.get(vecino)!= null) && this.DistanceVectorDeVecinos.get(vecino).containsKey(idDestino)){
+				  Integer costoMedianteVecino = this.myVecinos.get(vecino) + this.DistanceVectorDeVecinos.get(vecino).get(idDestino);
+				  if(this.myDistanciasMinimas.get(idDestino) > costoMedianteVecino) {
+					  this.myDistanciasMinimas.put(idDestino, costoMedianteVecino);
+					  this.myForwardingTable.put(idDestino, vecino);
+				  }
 			  }
 		  });
 	  });
@@ -180,7 +189,9 @@ public class RouterNode {
 	  if(!oldVector.equals(this.myDistanciasMinimas)) {
 		  vectorCambiado = true;
 	  }
-	  
+
+
+	  System.out.println("asdfa");
 	  if(vectorCambiado) {
 		  //mando actualización a vecinos
 		  this.myVecinos.forEach((idRouter, costo)->{
