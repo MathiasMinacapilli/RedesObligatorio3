@@ -9,7 +9,7 @@ public class RouterNode {
   private HashMap<Integer, Integer> myDistanciasMinimas; // <idNodoDestino, costoMinimo> ---------------CONTIENE LOS COSTOS MINIMOS PARA CADA DESTINO
   private HashMap<Integer, Integer> myForwardingTable; // <idNodoDestino, idVecino> --------CONTIENE LAS INTERFACES DE SALIDA PARA CADA DESTINO
   private HashMap<Integer, HashMap<Integer, Integer>> DistanceVectorDeVecinos; //<idVecino, distanceVector>  -CONTIENE LOS VECTORES DE DISTANCIA DE LOS VECINOS
-  private boolean reversaEnvenenada = false;
+  private boolean reversaEnvenenada = true;
   private Integer cantidadUpdates = 0;
   
   /*
@@ -61,7 +61,6 @@ public class RouterNode {
   */
   public void recvUpdate(RouterPacket pkt) {
 	  cantidadUpdates++;
-	  
 	  // Manejar el recibimiento de un paquete
 	  Integer sourceId = pkt.sourceid;
 	  
@@ -78,7 +77,12 @@ public class RouterNode {
 	  boolean vectorCambiado = false;
 	  // Recalculo mis costos
 	  
-	  
+	  this.myDistanciasMinimas.forEach((idRouterDestino, costo)->{
+		  if(idRouterDestino != this.myID) {
+			  this.myDistanciasMinimas.put(idRouterDestino, sim.INFINITY);
+		  }
+	  });
+	   
 	  pkt.mincost.forEach((idDestino, costo)->{
 		  if(!this.myDistanciasMinimas.containsKey(idDestino)) {
 			  this.myDistanciasMinimas.put(idDestino, sim.INFINITY);
@@ -112,14 +116,12 @@ public class RouterNode {
 	  }
 	  
 
-	  
-
-	  if(vectorCambiado) {
+	  //if(vectorCambiado) {
 	  printDistanceTable();
 	  
 	  myGUI.print("\n\n\n");
 
-	  }
+	  //}
   }
 
   
@@ -161,11 +163,20 @@ public class RouterNode {
 	  boolean vectorCambiado = false;
 	  // Recalculo mis costos
 	  
+	  System.out.println(dest);
+	  System.out.println(newcost);
+	  
 	  this.myVecinos.put(dest, newcost);
 	  if(!this.myDistanciasMinimas.containsKey(dest)) {
 		  this.myDistanciasMinimas.put(dest, newcost);
 		  this.myForwardingTable.put(dest,dest);
 	  }
+	  
+	  if(newcost == sim.INFINITY) {
+		  this.myVecinos.remove(dest);	
+	  }
+	  
+	  
 	  
 	  //Reinicializo mi vector de distanciasMinimas
 	  this.myDistanciasMinimas.forEach((idRouterDestino, costo)->{
@@ -186,12 +197,12 @@ public class RouterNode {
 		  });
 	  });
 	  
+	  
 	  if(!oldVector.equals(this.myDistanciasMinimas)) {
 		  vectorCambiado = true;
 	  }
 
 
-	  System.out.println("asdfa");
 	  if(vectorCambiado) {
 		  //mando actualización a vecinos
 		  this.myVecinos.forEach((idRouter, costo)->{
