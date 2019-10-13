@@ -163,9 +163,6 @@ public class RouterNode {
 	  boolean vectorCambiado = false;
 	  // Recalculo mis costos
 	  
-	  System.out.println(dest);
-	  System.out.println(newcost);
-	  
 	  this.myVecinos.put(dest, newcost);
 	  if(!this.myDistanciasMinimas.containsKey(dest)) {
 		  this.myDistanciasMinimas.put(dest, newcost);
@@ -175,7 +172,6 @@ public class RouterNode {
 	  if(newcost == sim.INFINITY) {
 		  this.myVecinos.remove(dest);	
 	  }
-	  
 	  
 	  
 	  //Reinicializo mi vector de distanciasMinimas
